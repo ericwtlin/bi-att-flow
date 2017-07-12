@@ -1,5 +1,5 @@
 import argparse
-import json
+import ujson as json
 import os
 # data: q, cq, (dq), (pq), y, *x, *cx
 # shared: x, cx, (dx), (px), word_counter, char_counter, word2vec
@@ -9,6 +9,8 @@ from collections import Counter
 from tqdm import tqdm
 
 from squad.utils import get_word_span, get_word_idx, process_tokens
+import logging
+import pdb
 
 
 def main():
@@ -18,10 +20,13 @@ def main():
 
 def get_args():
     parser = argparse.ArgumentParser()
-    home = os.path.expanduser("~")
-    source_dir = os.path.join(home, "datasets", "squad_stanford")
+    if platform.system() == "Linux":
+        data_base_dir = "/data/kf_grp/tlwu/"
+    elif platform.system() == "Darwin":
+        data_base_dir = "~"
+    source_dir = os.path.join(data_base_dir, "datasets", "squad_stanford")
     target_dir = "data/squad"
-    glove_dir = os.path.join(home, "datasets", "glove")
+    glove_dir = os.path.join(data_base_dir, "datasets", "glove")
     parser.add_argument('-s', "--source_dir", default=source_dir)
     parser.add_argument('-t', "--target_dir", default=target_dir)
     parser.add_argument("--train_name", default='train-v1.1.json')
@@ -190,10 +195,13 @@ def prepro_each(args, data_type, start_ratio=0.0, stop_ratio=1.0, out_name="defa
                     cyi0 = answer_start - i0
                     cyi1 = answer_stop - i1 - 1
                     # prtint(answer_text, w0[cyi0:], w1[:cyi1+1])
-                    assert answer_text[0] == w0[cyi0], (answer_text, w0, cyi0)
-                    assert answer_text[-1] == w1[cyi1]
-                    assert cyi0 < 32, (answer_text, w0)
-                    assert cyi1 < 32, (answer_text, w1)
+                    try:
+                        assert answer_text[0] == w0[cyi0], (answer_text, w0, cyi0)
+                        assert answer_text[-1] == w1[cyi1]
+                        assert cyi0 < 32, (answer_text, w0)
+                        assert cyi1 < 32, (answer_text, w1)
+                    except:
+                        pdb.set_trace()
 
                     yi.append([yi0, yi1])
                     cyi.append([cyi0, cyi1])
@@ -238,4 +246,12 @@ def prepro_each(args, data_type, start_ratio=0.0, stop_ratio=1.0, out_name="defa
     save(args, data, shared, out_name)
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='logger.log', filemode='w',
+        format='%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)d: %(message)s',
+        level=logging.DEBUG)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s %(filename)s %(funcName)s %(lineno)d: %(message)s'))
+    logging.getLogger().addHandler(console)
     main()
