@@ -11,7 +11,11 @@ from tqdm import tqdm
 from squad.utils import get_word_span, get_word_idx, process_tokens
 import logging
 import pdb
+import platform
+import nltk
 
+if "NLTK_DATA_PATH" in os.environ:
+    nltk.data.path.append(os.environ['NLTK_DATA_PATH'])
 
 def main():
     args = get_args()
@@ -23,7 +27,7 @@ def get_args():
     if platform.system() == "Linux":
         data_base_dir = "/data/kf_grp/tlwu/"
     elif platform.system() == "Darwin":
-        data_base_dir = "~"
+        data_base_dir = "/Users/eric-lin/"
     source_dir = os.path.join(data_base_dir, "datasets", "squad_stanford")
     target_dir = "data/squad"
     glove_dir = os.path.join(data_base_dir, "datasets", "glove")
@@ -113,7 +117,6 @@ def get_word2vec(args, word_counter):
 
 def prepro_each(args, data_type, start_ratio=0.0, stop_ratio=1.0, out_name="default", in_path=None):
     if args.tokenizer == "PTB":
-        import nltk
         sent_tokenize = nltk.sent_tokenize
         def word_tokenize(tokens):
             return [token.replace("''", '"').replace("``", '"') for token in nltk.word_tokenize(tokens)]
