@@ -3,7 +3,8 @@ import random
 import itertools
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.ops.rnn_cell import BasicLSTMCell, GRUCell
+#from tensorflow.python.ops.rnn_cell import BasicLSTMCell, GRUCell
+from tensorflow.contrib.rnn import BasicLSTMCell, GRUCell
 
 from basic_cnn.read_data import DataSet
 from basic_cnn.superhighway import SHCell
